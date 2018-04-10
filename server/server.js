@@ -17,6 +17,13 @@ app.post('/todo', (req,res) => {
     }, (e) => {
         console.log('unable to save',e);
         res.status(400).send(e);
+    });  
+});
+app.get('/todo', (req,res) => {
+    Todo.find().then((todos) => {
+        res.send({todos});
+    }, (e) => {
+        res.status(400).send({e});
     });
 });
 app.listen(3000, () => {
