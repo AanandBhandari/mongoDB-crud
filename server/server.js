@@ -7,10 +7,11 @@ var bodyParser = require('body-parser');
 var _ = require('lodash');
 var app = express();
 app.use(bodyParser.json());
-app.post('/todo', (req,res) => {
+app.post('/todos', (req,res) => {
     var newTodo = new Todo(
         {
-            text : req.body.text
+            text : req.body.text,
+            completed : req.body.completed
         }
     );
     newTodo.save().then((doc) => {
@@ -20,6 +21,21 @@ app.post('/todo', (req,res) => {
         console.log('unable to save',e);
         res.status(400).send(e);
     });  
+});
+app.post('/user',(req,res)=> {
+    let body = _.pick(req.body,['email','password']);
+    // let newUser = new User({
+    //     email : body.email,
+    //     password : body.password
+    // });
+        let newUser = new User(body);
+    newUser.save().then((doc) => {
+        console.log(JSON.stringify(doc,undefined,2));
+        res.send(doc);
+    }, (e) => {
+        console.log('unable to save',e);
+        res.status(400).send(e);
+    });
 });
 app.get('/todo', (req,res) => {
     Todo.find().then((todos) => {
@@ -38,7 +54,7 @@ app.get('/todos/:id',(req,res) => {
     // }
     Todo.findById(id).then((doc) => {
         if (!doc) {
-            res.status(400).send();
+            res.status(404).send();
         }
         res.send({doc});
     }).catch((e) => {
@@ -54,35 +70,35 @@ app.delete('/todos/:id',(req,res) => {
     // }
     Todo.findByIdAndRemove(id).then((doc) => {
         if (!doc) {
-            res.status(400).send();
+            res.status(404).send();
         }
         res.send({doc});
     }).catch((e) => {
         res.status(400).send();
     });
 });
-// app.patch('/todos/:id', (req,res) => {
-//     let id = req.params.id;
-//    // if (!objectID.isValid(id)) {
-//     //    return res.status(404).send();
+app.patch('/todos/:id', (req,res) => {
+    let id = req.params.id;
+   // if (!objectID.isValid(id)) {
+    //    return res.status(404).send();
        
-//     // }
-//     let body = _.pick(req.body,['text','completed']);
-//     if (_.isBoolean(body.completed) && body.completed) {
-//         body.completedAt = new Date().getTime();
-//     } else {
-//         body.completed = false;
-//         body.completedAt = null;
-//     }
-//     Todo.findByIdAndUpdate(id,{$set: body},{new : true}).then((doc) => {
-//         if (!doc) {
-//             return res.status(404).send(); 
-//         }
-//         res.send({doc});
-//     }).catch((e) => {
-//         res.status(400).send();
-//     });
-// });
+    // }
+    let body = _.pick(req.body,['text','completed']);
+    if (_.isBoolean(body.completed) && body.completed) {
+        body.completedAt = new Date().getTime();
+    } else {
+        body.completed = false;
+        body.completedAt = null;
+    }
+    Todo.findByIdAndUpdate(id,{$set: body},{new : true}).then((doc) => {
+        if (!doc) {
+            return res.status(404).send(); 
+        }
+        res.send({doc});
+    }).catch((e) => {
+        res.status(400).send();
+    });
+});
 app.listen(3000, () => {
     console.log('connected to the server');
 });
