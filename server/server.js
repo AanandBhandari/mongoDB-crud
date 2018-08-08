@@ -15,6 +15,7 @@ app.post('/todos', (req,res) => {
         }
     );
     newTodo.save().then((doc) => {
+        // console.log(doc)
         console.log(JSON.stringify(doc,undefined,2));
         res.send(doc);
     }, (e) => {
@@ -24,15 +25,20 @@ app.post('/todos', (req,res) => {
 });
 app.post('/user',(req,res)=> {
     let body = _.pick(req.body,['email','password']);
+    console.log(body)
     // let newUser = new User({
     //     email : body.email,
     //     password : body.password
     // });
-        let newUser = new User(body);
-    newUser.save().then((doc) => {
-        console.log(JSON.stringify(doc,undefined,2));
-        res.send(doc);
-    }, (e) => {
+        let user = new User(body);
+        user.save().then(() => {
+        // console.log(JSON.stringify(doc,undefined,2));
+        // res.send(doc);
+        return user.generateAuthTokens();
+
+    }).then((token)=> {
+        res.header('x-auth',token).send(user);
+    }).catch((e) => {
         console.log('unable to save',e);
         res.status(400).send(e);
     });
