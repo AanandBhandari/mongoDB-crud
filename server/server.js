@@ -1,6 +1,7 @@
 var {mongoose} = require('./db/mongoose.js');
 var {User} = require('./models/user.js');
 var {Todo} = require('./models/todos.js');
+var {authenticate} = require('./middleware/authenticate.js')
 var {objectID} = require('mongodb');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -42,6 +43,10 @@ app.post('/user',(req,res)=> {
         console.log('unable to save',e);
         res.status(400).send(e);
     });
+});
+
+app.get('/user/me',authenticate,(req,res)=> {
+    res.send(req.user);
 });
 app.get('/todo', (req,res) => {
     Todo.find().then((todos) => {
