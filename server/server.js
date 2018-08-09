@@ -48,6 +48,17 @@ app.post('/user',(req,res)=> {
 app.get('/user/me',authenticate,(req,res)=> {
     res.send(req.user);
 });
+app.post('/user/login',(req,res) => {
+    let body = _.pick(req.body,['email','password']);
+    User.findByCredentials(body.email,body.password).then((user)=> {
+        // res.send(user);
+         user.generateAuthTokens().then((token)=> {
+            res.header('x-auth',token).send(user);
+        });
+    }).catch((e) => {
+        res.status(400).send(e);
+    });
+});
 app.get('/todo', (req,res) => {
     Todo.find().then((todos) => {
         res.send({todos});
