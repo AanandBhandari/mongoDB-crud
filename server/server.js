@@ -59,6 +59,13 @@ app.post('/user/login',(req,res) => {
         res.status(400).send(e);
     });
 });
+app.delete('/user/me/token',authenticate,(req,res) => {
+    req.user.removeToken(req.token).then(()=> {
+        res.status(200).send();
+    },()=> {
+        res.status(400).send();
+    });
+})
 app.get('/todo', (req,res) => {
     Todo.find().then((todos) => {
         res.send({todos});
